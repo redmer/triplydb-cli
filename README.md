@@ -1,8 +1,10 @@
 # ghcr.io/redmer/triplydb-cli
 
-Packages the official Triply CLI inside a Docker container.
+Packages [the official Triply CLI][docs] inside a Docker container.
 
-## Usage
+[docs]: https://docs.triply.cc/triply-cli/
+
+## Example usage
 
 ```sh
 docker run --rm ghcr.io/redmer/triplydb-cli import-from-file data.nq
