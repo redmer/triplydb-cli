@@ -1,0 +1,65 @@
+name: "TriplyDB Upload Asset"
+description: "Load files as assets into a TriplyDB dataset"
+inputs:
+  files:
+    description: "Files to upload as assets"
+    required: true
+  dataset:
+    description: "Dataset to upload file(s) to"
+    required: false
+  token:
+    description: "TriplyDB access token"
+    required: true
+  account:
+    description: "Optional: Account to upload file(s) for"
+    required: false
+  url:
+    description: "Optional: URL of the triply API"
+    required: false
+  http-proxy:
+    description: "Use HTTP proxy for all requests"
+    required: false
+  https-proxy:
+    description: "Use HTTPS proxy for all requests"
+    required: false
+  overwrite:
+    description: "Overwrite the asset if it already exists (default: false)"
+    required: false
+runs:
+  using: "composite"
+  steps:
+    - name: Upload Asset
+      shell: bash
+      run: |
+        ARGS=("upload-asset")
+
+        if [ -n "${{ inputs.dataset }}" ]; then
+          ARGS+=("--dataset" "${{ inputs.dataset }}")
+        fi
+
+        if [ -n "${{ inputs.token }}" ]; then
+          ARGS+=("--token" "${{ inputs.token }}")
+        fi
+
+        if [ -n "${{ inputs.account }}" ]; then
+          ARGS+=("--account" "${{ inputs.account }}")
+        fi
+
+        if [ -n "${{ inputs.url }}" ]; then
+          ARGS+=("--url" "${{ inputs.url }}")
+        fi
+
+        if [ -n "${{ inputs.http-proxy }}" ]; then
+          ARGS+=("--http-proxy" "${{ inputs.http-proxy }}")
+        fi
+
+        if [ -n "${{ inputs.https-proxy }}" ]; then
+          ARGS+=("--https-proxy" "${{ inputs.https-proxy }}")
+        fi
+
+        if [ "${{ inputs.overwrite }}" == "true" ]; then
+          ARGS+=("--overwrite")
+        fi
+
+        # Add files unquoted to allow multiple arguments correctly
+        docker run --rm -v $GITHUB_WORKSPACE:/workspace -w /workspace ghcr.io/redmer/triplydb-cli:latest "${ARGS[@]}" ${{ inputs.files }}

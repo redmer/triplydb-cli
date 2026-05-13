@@ -1,0 +1,52 @@
+name: "TriplyDB Run Pipeline"
+description: "Run a TriplyDB pipeline. TriplyDB pipelines currently supports executing speedy construct queries. A pipeline can run for an arbitrary duration, and for arbitrarey result sizes."
+inputs:
+  pipeline-file:
+    description: "JSON config file"
+    required: true
+  token:
+    description: "TriplyDB access token"
+    required: true
+  account:
+    description: "Account where query job is created and stored"
+    required: false
+  url:
+    description: "Optional: URL of the triply API"
+    required: false
+  http-proxy:
+    description: "Use HTTP proxy for all requests"
+    required: false
+  https-proxy:
+    description: "Use HTTPS proxy for all requests"
+    required: false
+runs:
+  using: "composite"
+  steps:
+    - name: Run Pipeline
+      shell: bash
+      run: |
+        ARGS=("run-pipeline")
+
+        if [ -n "${{ inputs.token }}" ]; then
+          ARGS+=("--token" "${{ inputs.token }}")
+        fi
+
+        if [ -n "${{ inputs.account }}" ]; then
+          ARGS+=("--account" "${{ inputs.account }}")
+        fi
+
+        if [ -n "${{ inputs.url }}" ]; then
+          ARGS+=("--url" "${{ inputs.url }}")
+        fi
+
+        if [ -n "${{ inputs.http-proxy }}" ]; then
+          ARGS+=("--http-proxy" "${{ inputs.http-proxy }}")
+        fi
+
+        if [ -n "${{ inputs.https-proxy }}" ]; then
+          ARGS+=("--https-proxy" "${{ inputs.https-proxy }}")
+        fi
+
+        ARGS+=("${{ inputs.config-file }}")
+
+        docker run --rm -v $GITHUB_WORKSPACE:/workspace -w /workspace ghcr.io/redmer/triplydb-cli:latest "${ARGS[@]}"
