@@ -1,0 +1,79 @@
+name: "TriplyDB Import From File"
+description: "Load files as graphs into a TriplyDB dataset"
+inputs:
+  files:
+    description: "Files to import"
+    required: true
+  dataset:
+    description: "Dataset to upload file(s) to"
+    required: false
+  token:
+    description: "TriplyDB access token"
+    required: true
+  account:
+    description: "Optional: Account to upload file(s) for"
+    required: false
+  url:
+    description: "Optional: URL of the triply API"
+    required: false
+  default-access-level:
+    description: "The accesslevel of the dataset (public [default], internal, private), when creating the dataset if it does not exist yet."
+    required: false
+  http-proxy:
+    description: "Use HTTP proxy for all requests"
+    required: false
+  https-proxy:
+    description: "Use HTTPS proxy for all requests"
+    required: false
+  default-graph-name:
+    description: "Default graph, used when e.g. ntriples are uploaded"
+    required: false
+  mode:
+    description: "Defines how to resolve issues when graph name already exists (overwrite, rename [default], merge)"
+    required: false
+runs:
+  using: "composite"
+  steps:
+    - name: Import From File
+      shell: bash
+      run: |
+        ARGS=("import-from-file")
+
+        if [ -n "${{ inputs.dataset }}" ]; then
+          ARGS+=("--dataset" "${{ inputs.dataset }}")
+        fi
+
+        if [ -n "${{ inputs.token }}" ]; then
+          ARGS+=("--token" "${{ inputs.token }}")
+        fi
+
+        if [ -n "${{ inputs.account }}" ]; then
+          ARGS+=("--account" "${{ inputs.account }}")
+        fi
+
+        if [ -n "${{ inputs.url }}" ]; then
+          ARGS+=("--url" "${{ inputs.url }}")
+        fi
+
+        if [ -n "${{ inputs.default-access-level }}" ]; then
+          ARGS+=("--default-access-level" "${{ inputs.default-access-level }}")
+        fi
+
+        if [ -n "${{ inputs.http-proxy }}" ]; then
+          ARGS+=("--http-proxy" "${{ inputs.http-proxy }}")
+        fi
+
+        if [ -n "${{ inputs.https-proxy }}" ]; then
+          ARGS+=("--https-proxy" "${{ inputs.https-proxy }}")
+        fi
+
+        if [ -n "${{ inputs.default-graph-name }}" ]; then
+          ARGS+=("--default-graph-name" "${{ inputs.default-graph-name }}")
+        fi
+
+        if [ -n "${{ inputs.mode }}" ]; then
+          ARGS+=("--mode" "${{ inputs.mode }}")
+        fi
+
+        # Add files unquoted to allow multiple arguments correctly
+        docker run --rm -v $GITHUB_WORKSPACE:/workspace -w /workspace ghcr.io/redmer/triplydb-cli:latest "${ARGS[@]}" ${{ inputs.files }}
