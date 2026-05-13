@@ -61,5 +61,8 @@ runs:
           ARGS+=("--overwrite")
         fi
 
+        # Determine tag from action reference, fallback to latest
+        IMAGE_TAG="${{ github.action_ref }}"
+
         # Add files unquoted to allow multiple arguments correctly
-        docker run --rm -v $GITHUB_WORKSPACE:/workspace -w /workspace ghcr.io/redmer/triplydb-cli:latest "${ARGS[@]}" ${{ inputs.files }}
+        docker run --rm -v $GITHUB_WORKSPACE:/workspace -w /workspace ghcr.io/redmer/triplydb-cli:${IMAGE_TAG:-latest} "${ARGS[@]}" ${{ inputs.files }}
