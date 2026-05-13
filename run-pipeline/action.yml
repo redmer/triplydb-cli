@@ -49,4 +49,7 @@ runs:
 
         ARGS+=("${{ inputs.config-file }}")
 
-        docker run --rm -v $GITHUB_WORKSPACE:/workspace -w /workspace ghcr.io/redmer/triplydb-cli:latest "${ARGS[@]}"
+        # Determine tag from action reference, fallback to latest
+        IMAGE_TAG="${{ github.action_ref }}"
+
+        docker run --rm -v $GITHUB_WORKSPACE:/workspace -w /workspace ghcr.io/redmer/triplydb-cli:${IMAGE_TAG:-latest} "${ARGS[@]}"
