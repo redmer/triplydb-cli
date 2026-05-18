@@ -34,7 +34,7 @@ inputs:
 outputs:
   dataset-console-url:
     description: "The URL of the dataset in the TriplyDB console"
-    value: ${{ steps.compute-url.outputs.dataset-url }}
+    value: ${{ steps.compute-url.outputs.dataset-console-url }}
 runs:
   using: "composite"
   steps:
