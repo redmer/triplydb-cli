@@ -1,0 +1,19 @@
+Usage: triplydb upload-asset [options] <files...>
+
+load files as assets into a TriplyDB dataset
+
+Options:
+  -d, --dataset <dataset>  Dataset to upload file(s) to (default:
+                           $TRIPLYDB_DATASET)
+  -t, --token <token>      TriplyDB access token (default: $TRIPLYDB_TOKEN)
+  -a, --account <account>  Optional: Account to upload file(s) for. (default:
+                           the account that owns the token, or
+                           $TRIPLYDB_ACCOUNT)
+  -u, --url <url>          Optional: Url of the triply API. (default: the API
+                           where the token was created)
+  --http-proxy <proxy>     TriplyDB access token (default: $HTTP_PROXY)
+  --https-proxy <proxy>    TriplyDB access token (default: $HTTPS_PROXY)
+  --overwrite              Overwrite the asset if it already exists. By default,
+                           this script will add a new version if an asset
+                           already exists (default: false)
+  -h, --help               display help for command

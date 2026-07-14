@@ -1,0 +1,52 @@
+name: CLI Snapshot Check
+
+on:
+    schedule:
+        # Every Monday at 08:00 UTC
+        - cron: "0 8 * * 1"
+    workflow_dispatch: {}
+
+permissions:
+    contents: read
+    issues: write
+
+jobs:
+    snapshot:
+        name: Check triplydb CLI help snapshots
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v6
+
+            - name: Run snapshot diff
+              id: diff
+              run: |
+                  set +e
+                  bash scripts/snapshot.sh
+                  echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+
+            - name: Open issue on change
+              if: steps.diff.outputs.exit_code == '1'
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  TITLE="chore: triplydb CLI help output changed"
+
+                  # Check for an already-open issue with this exact title (idempotent)
+                  EXISTING=$(gh issue list \
+                    --repo "$GITHUB_REPOSITORY" \
+                    --state open \
+                    --search "$TITLE" \
+                    --json number \
+                    --jq '.[0].number // empty')
+
+                  if [ -n "$EXISTING" ]; then
+                    echo "Open issue #$EXISTING already exists — skipping creation."
+                  else
+                    gh issue create \
+                      --repo "$GITHUB_REPOSITORY" \
+                      --title "$TITLE" \
+                      --label "upstream-change" \
+                      --body-file snapshot-diff.md
+                    echo "Issue created."
+                  fi

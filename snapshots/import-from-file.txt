@@ -1,0 +1,15 @@
+Usage: triplydb import-from-file [options] <files...>
+
+load files as graphs into a TriplyDB dataset
+
+Options:
+  -d, --dataset <dataset>                Dataset to upload file(s) to (default: $TRIPLYDB_DATASET)
+  --default-access-level <access-level>  The accesslevel of the dataset. This is only applied when creating the dataset (i.e., if it does not exist yet) (choices: "public", "internal", "private", default: "public")
+  -t, --token <token>                    TriplyDB access token (default: $TRIPLYDB_TOKEN)
+  -a, --account <account>                Optional: Account to upload file(s) for. (default: the account that owns the token, or $TRIPLYDB_ACCOUNT)
+  -u, --url <url>                        Optional: Url of the triply API. (default: the API where the token was created)
+  --http-proxy <proxy>                   Use HTTP proxy for all requests (default: $HTTP_PROXY)
+  --https-proxy <proxy>                  Use HTTP proxy for all requests (default: $HTTPS_PROXY)
+  --default-graph-name <graph>           Default graph, used when e.g. ntriples are uploaded
+  --mode <mode>                          Defines how to resolve issues when graph name already exists (choices: "overwrite", "rename", "merge", default: "rename")
+  -h, --help                             display help for command

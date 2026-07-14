@@ -1,0 +1,39 @@
+Usage: triplydb run-pipeline [options] <json config file>
+
+Run a TriplyDB pipeline. TriplyDB pipelines currently supports executing speedy
+construct queries. A pipeline can run for an arbitrary duration, and for
+arbitrarey result sizes.
+
+Options:
+  -t, --token <token>      TriplyDB access token (default: $TRIPLYDB_TOKEN)
+  -a, --account <account>  Account where query job is created and stored.
+                           (default: $TRIPLYDB_ACCOUNT, or otherwise the account
+                           that owns the token)
+  -u, --url <url>          Optional: Url of the triply API. (default: the API
+                           where the token was created)
+  --http-proxy <proxy>     Use HTTP proxy for all requests (default:
+                           $HTTP_PROXY)
+  --https-proxy <proxy>    Use HTTP proxy for all requests (default:
+                           $HTTPS_PROXY)
+  -h, --help               display help for command
+
+    Sample json version 0.2 config:
+    {
+      "queries": [{
+          "name": "accountName/queryName", (Required)
+          "priority": 1, (Optional)
+          "variables": {
+            "var1": "value1",
+            "var2": "value2"
+          } (Optional)
+
+      },{
+          "name": "accountName/queryName",
+          "version": 2 (Optional)
+      }],
+      "sourceDataset": "accountName/datasetName", (Required)
+      "targetDataset": "accountName/datasetName", (Required)
+      "targetGraphName": "graph:default", (Optional)
+      "version": 0.2 (Required)
+    }
+    
