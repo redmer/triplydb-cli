@@ -47,7 +47,7 @@ runs:
           ARGS+=("--https-proxy" "${{ inputs.https-proxy }}")
         fi
 
-        ARGS+=("${{ inputs.config-file }}")
+        ARGS+=("${{ inputs.pipeline-file }}")
 
         # Determine tag from action reference, fallback to latest
         IMAGE_TAG="${{ github.action_ref }}"
