@@ -31,11 +31,52 @@ inputs:
   mode:
     description: "Defines how to resolve issues when graph name already exists (overwrite, rename [default], merge)"
     required: false
+outputs:
+  dataset-console-url:
+    description: "The visitable URL of the dataset in TriplyDB (console)"
+    value: ${{ steps.compute-url.outputs.dataset-console-url }}
 runs:
   using: "composite"
   steps:
+    - id: compute-url
+      name: Compute Output URL
+      shell: bash
+      run: |
+        TOKEN="${{ inputs.token }}"
+        if [ -z "$TOKEN" ]; then
+          TOKEN="$TRIPLYDB_TOKEN"
+        fi
+
+        API_URL="${{ inputs.url }}"
+        if [ -z "$API_URL" ]; then
+          # Decode JWT token to get 'iss'
+          PAYLOAD=$(echo "$TOKEN" | cut -d. -f2 | tr '_-' '/+')
+          PADDING=$((${#PAYLOAD} % 4))
+          if [ $PADDING -eq 2 ]; then PAYLOAD="${PAYLOAD}=="; elif [ $PADDING -eq 3 ]; then PAYLOAD="${PAYLOAD}="; fi
+          API_URL=$(echo "$PAYLOAD" | base64 -d 2>/dev/null | jq -r .iss)
+        fi
+
+        CONSOLE_URL=$(curl -s -H "Authorization: Bearer $TOKEN" "$API_URL/info" | jq -r '.consoleUrl')
+
+        ACCOUNT="${{ inputs.account }}"
+        if [ -z "$ACCOUNT" ]; then
+          ACCOUNT="$TRIPLYDB_ACCOUNT"
+        fi
+        if [ -z "$ACCOUNT" ]; then
+          ACCOUNT=$(curl -s -H "Authorization: Bearer $TOKEN" "$API_URL/me" | jq -r '.accountName')
+        fi
+
+        DATASET="${{ inputs.dataset }}"
+        if [ -z "$DATASET" ]; then
+          DATASET="$TRIPLYDB_DATASET"
+        fi
+
+        echo "dataset-console-url=$CONSOLE_URL/$ACCOUNT/$DATASET" >> $GITHUB_OUTPUT
+
     - name: Import From File
       shell: bash
+      env:
+        ACTION_REF: ${{ github.action_ref }}
       run: |
         ARGS=("import-from-file")
 
@@ -76,7 +117,7 @@ runs:
         fi
 
         # Determine tag from action reference, fallback to latest
-        IMAGE_TAG="${{ github.action_ref }}"
+        IMAGE_TAG="$ACTION_REF"
 
         # Add files unquoted to allow multiple arguments correctly
         docker run --rm -v $GITHUB_WORKSPACE:/workspace -w /workspace ghcr.io/redmer/triplydb-cli:${IMAGE_TAG:-latest} "${ARGS[@]}" ${{ inputs.files }}
