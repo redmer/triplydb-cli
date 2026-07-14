@@ -33,7 +33,7 @@ inputs:
     required: false
 outputs:
   dataset-console-url:
-    description: "The URL of the dataset in the TriplyDB console"
+    description: "The visitable URL of the dataset in TriplyDB (console)"
     value: ${{ steps.compute-url.outputs.dataset-console-url }}
 runs:
   using: "composite"
@@ -75,6 +75,8 @@ runs:
 
     - name: Import From File
       shell: bash
+      env:
+        ACTION_REF: ${{ github.action_ref }}
       run: |
         ARGS=("import-from-file")
 
@@ -115,7 +117,7 @@ runs:
         fi
 
         # Determine tag from action reference, fallback to latest
-        IMAGE_TAG="${{ github.action_ref }}"
+        IMAGE_TAG="$ACTION_REF"
 
         # Add files unquoted to allow multiple arguments correctly
         docker run --rm -v $GITHUB_WORKSPACE:/workspace -w /workspace ghcr.io/redmer/triplydb-cli:${IMAGE_TAG:-latest} "${ARGS[@]}" ${{ inputs.files }}
