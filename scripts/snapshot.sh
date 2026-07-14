@@ -44,7 +44,7 @@ docker build -q -t "$IMAGE" "$REPO_ROOT"
 #     upload-asset      Upload binary assets …
 # We extract the first word on each such line.
 echo "==> Extracting verb list..."
-RAW_HELP=$(docker run --rm "$IMAGE" --help 2>&1 || true)
+RAW_HELP=$(docker run --rm "$IMAGE" --help 2>&1 | tr -d '\r' || true)
 VERBS=$(echo "$RAW_HELP" \
   | awk '/^[[:space:]]+[a-z]/ && !/^[[:space:]]+-/ { print $1 }' \
   | grep -v '^help$' \
@@ -63,10 +63,10 @@ mkdir -p "$SNAPSHOT_DIR"
 # ---------------------------------------------------------------------------
 if [ "$UPDATE" = true ]; then
   echo "==> Writing updated snapshots..."
-  echo "$VERBS" > "$SNAPSHOT_DIR/verbs.txt"
+  printf '%s\n' "$VERBS" > "$SNAPSHOT_DIR/verbs.txt"
   echo "  wrote snapshots/verbs.txt"
   while IFS= read -r verb; do
-    docker run --rm "$IMAGE" "$verb" --help 2>&1 \
+    docker run --rm "$IMAGE" "$verb" --help 2>&1 | tr -d '\r' \
       > "$SNAPSHOT_DIR/${verb}.txt" || true
     echo "  wrote snapshots/${verb}.txt"
   done <<< "$VERBS"
@@ -101,7 +101,7 @@ fi
 # Use the union of committed verbs and currently found verbs
 KNOWN_VERBS=()
 if [ -f "$VERBS_SNAPSHOT" ]; then
-  while IFS= read -r v; do KNOWN_VERBS+=("$v"); done < "$VERBS_SNAPSHOT"
+  while IFS= read -r v; do KNOWN_VERBS+=("${v%$'\r'}"); done < "$VERBS_SNAPSHOT"
 fi
 while IFS= read -r v; do
   if [[ ! " ${KNOWN_VERBS[*]} " =~ " ${v} " ]]; then
@@ -111,7 +111,7 @@ done <<< "$VERBS"
 
 for verb in "${KNOWN_VERBS[@]}"; do
   VERB_SNAPSHOT="$SNAPSHOT_DIR/${verb}.txt"
-  CURRENT_HELP=$(docker run --rm "$IMAGE" "$verb" --help 2>&1 || true)
+  CURRENT_HELP=$(docker run --rm "$IMAGE" "$verb" --help 2>&1 | tr -d '\r' || true)
 
   if [ ! -f "$VERB_SNAPSHOT" ]; then
     CHANGED=true
